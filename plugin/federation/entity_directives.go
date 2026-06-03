@@ -29,6 +29,10 @@ var federationDirectiveNames = map[string]bool{
 	"requiresScopes": true,
 	"policy":         true,
 
+	// Federation v2.8+
+	"context":     true,
+	"fromContext": true,
+
 	// gqlgen-specific
 	"entityResolver": true,
 	"goModel":        true,

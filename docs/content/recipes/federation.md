@@ -316,6 +316,47 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 }
 ```
 
+## Using @context and @fromContext
+
+Federation 2.8 introduced [contextual arguments](https://www.apollographql.com/docs/federation/entities/use-contexts): `@context` marks a type as a provider of a named context, and `@fromContext` populates a field argument with a value pulled from the nearest ancestor in the query path that provides that context.
+
+These directives require `federation.version: 2`. No additional options are needed - unlike `@requires`, the contextual value is delivered to your subgraph by the Apollo router as an ordinary field argument bound to a query-plan variable, so it flows through gqlgen's normal argument handling.
+
+### Example
+
+```graphql
+type User @key(fields: "id") @context(name: "userContext") {
+	id: ID!
+	userCurrency: String!
+}
+
+type Transaction @key(fields: "id") {
+	id: ID!
+	amount: Int!
+	amountInUserCurrency(
+		currencyCode: String
+			@fromContext(field: "$userContext { userCurrency }")
+	): String! @goField(forceResolver: true)
+}
+```
+
+Two things to keep in mind for the field that receives a contextual argument:
+
+- Mark it with `@goField(forceResolver: true)`. A field is not automatically promoted to a resolver just because it has an argument, and the contextual value must arrive through a resolver.
+- Declare the contextual argument as **nullable** — the router binds it to a nullable query-plan variable.
+
+The generated resolver receives the argument like any other:
+
+```golang
+func (r *transactionResolver) AmountInUserCurrency(ctx context.Context, obj *model.Transaction, currencyCode *string) (string, error) {
+	currency := "USD"
+	if currencyCode != nil {
+		currency = *currencyCode
+	}
+	return fmt.Sprintf("%d %s", obj.Amount, currency), nil
+}
+```
+
 ## Using @entityResolver
 
 The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.

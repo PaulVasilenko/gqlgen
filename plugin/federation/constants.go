@@ -23,6 +23,12 @@ const dirNameEntityResolver = "entityResolver"
 
 const dirNamePopulateFromRepresentations = "populateFromRepresentations"
 
+// The @context directive marks a type as a provider of a named context.
+const dirNameContext = "context"
+
+// The @fromContext directive pulls a value from an ancestor's context into a field argument.
+const dirNameFromContext = "fromContext"
+
 var populateFromRepresentationsImplementation = `func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 	fc := graphql.GetFieldContext(ctx)
 
@@ -73,8 +79,10 @@ const federationVersion1Schema = `
 const federationVersion2Schema = `
 	directive @authenticated on FIELD_DEFINITION | OBJECT | INTERFACE | SCALAR | ENUM
 	directive @composeDirective(name: String!) repeatable on SCHEMA
+	directive @context(name: String!) repeatable on INTERFACE | OBJECT | UNION
 	directive @extends on OBJECT | INTERFACE
 	directive @external on OBJECT | FIELD_DEFINITION
+	directive @fromContext(field: ContextFieldValue) on ARGUMENT_DEFINITION
 	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
 	directive @inaccessible on
 	  | ARGUMENT_DEFINITION
@@ -117,6 +125,7 @@ const federationVersion2Schema = `
 	  | SCALAR
 	  | UNION
 	scalar _Any
+	scalar ContextFieldValue
 	scalar FieldSet
 	scalar federation__Policy
 	scalar federation__Scope
@@ -145,6 +154,9 @@ var builtins = config.TypeMap{
 		Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
 	},
 	"federation__Policy": {
+		Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+	},
+	"ContextFieldValue": {
 		Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
 	},
 }

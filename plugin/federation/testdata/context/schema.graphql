@@ -1,0 +1,33 @@
+extend schema
+  @link(
+    url: "https://specs.apollo.dev/federation/v2.8"
+    import: ["@key", "@context", "@fromContext", "@external"]
+  )
+
+directive @goField(
+  forceResolver: Boolean
+  name: String
+  omittable: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Query {
+  transaction: Transaction
+}
+
+# A context provider: marks User as the source of the "userContext" context.
+type User @key(fields: "id") @context(name: "userContext") {
+  id: ID!
+  userCurrency: String!
+}
+
+# Transaction has a contextual argument. At runtime the router binds
+# `currencyCode` to a query-plan variable resolved from the nearest ancestor
+# that provides "userContext", and delivers it as an ordinary field argument.
+type Transaction @key(fields: "id") {
+  id: ID!
+  amount: Int!
+  amountInUserCurrency(
+    currencyCode: String
+      @fromContext(field: "$userContext { userCurrency }")
+  ): String! @goField(forceResolver: true)
+}

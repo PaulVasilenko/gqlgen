@@ -164,6 +164,8 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["policy"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["interfaceObject"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives[dirNameContext] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives[dirNameFromContext] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
 	if f.usesRequires && f.PackageOptions.ComputedRequires {

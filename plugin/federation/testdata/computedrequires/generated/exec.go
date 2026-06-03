@@ -332,8 +332,10 @@ type MultiHelloMultipleRequires
 	{Name: "../../../federation/directives.graphql", Input: `
 	directive @authenticated on FIELD_DEFINITION | OBJECT | INTERFACE | SCALAR | ENUM
 	directive @composeDirective(name: String!) repeatable on SCHEMA
+	directive @context(name: String!) repeatable on INTERFACE | OBJECT | UNION
 	directive @extends on OBJECT | INTERFACE
 	directive @external on OBJECT | FIELD_DEFINITION
+	directive @fromContext(field: ContextFieldValue) on ARGUMENT_DEFINITION
 	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
 	directive @inaccessible on
 	  | ARGUMENT_DEFINITION
@@ -376,6 +378,7 @@ type MultiHelloMultipleRequires
 	  | SCALAR
 	  | UNION
 	scalar _Any
+	scalar ContextFieldValue
 	scalar FieldSet
 	scalar federation__Policy
 	scalar federation__Scope
@@ -7855,6 +7858,24 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOContextFieldValue2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOContextFieldValue2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(*v)
 	return res
 }
 
